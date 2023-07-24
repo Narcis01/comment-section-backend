@@ -1,13 +1,21 @@
 package com.naical.commentsection.user;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.naical.commentsection.comment.Comment;
 import com.naical.commentsection.post.Post;
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
+import org.springframework.stereotype.Component;
 
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Data
+@Setter
+@Getter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class User {
 
     @Id
@@ -23,7 +31,26 @@ public class User {
     @Column(name = "image_url")
     private String imageUrl;
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user",cascade = CascadeType.REMOVE, fetch = FetchType.LAZY, orphanRemoval = true)
     private Set<Post> post;
 
+    @OneToMany(mappedBy = "user",cascade = CascadeType.REMOVE, fetch = FetchType.LAZY, orphanRemoval = true)
+    private Set<Comment> comment;
+
+    public static UserDTO toDTO(User user){ return new UserDTO(user);}
+    public void addPost(Post post){
+        if(this.post == null){
+            this.post = new HashSet<>();
+        }
+        post.setUser(this);
+        this.post.add(post);
+    }
+
+    public void addComment(Comment comment){
+        if(this.comment == null){
+            this.comment = new HashSet<>();
+        }
+        comment.setUser(this);
+        this.comment.add(comment);
+    }
 }

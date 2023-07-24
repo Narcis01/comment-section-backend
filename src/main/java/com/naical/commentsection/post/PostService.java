@@ -1,9 +1,10 @@
 package com.naical.commentsection.post;
 
-import com.naical.commentsection.user.User;
-
 import java.util.List;
 
 public interface PostService {
-    List<Post> getAll();
+    List<PostDTO> getAll();
+    void save(Post post);
+    void delete(int id);
+    Post getById(int id);
 }

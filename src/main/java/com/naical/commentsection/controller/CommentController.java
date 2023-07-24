@@ -1,6 +1,7 @@
 package com.naical.commentsection.controller;
 
 import com.naical.commentsection.comment.Comment;
+import com.naical.commentsection.comment.CommentDTO;
 import com.naical.commentsection.comment.CommentServiceImp;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -20,8 +21,8 @@ public class CommentController {
 
 
     @GetMapping("/comments")
-    public List<Comment> getAll(){
-        return commentServiceImpl.getAll();
+    public List<CommentDTO> getAll(){
+        return commentServiceImpl.getAll().stream().map(Comment::toDTO).toList();
     }
 
 }
