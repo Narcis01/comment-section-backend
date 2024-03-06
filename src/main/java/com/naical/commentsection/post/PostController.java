@@ -1,11 +1,8 @@
-package com.naical.commentsection.controller;
+package com.naical.commentsection.post;
 
-import com.naical.commentsection.comment.CommentServiceImp;
-import com.naical.commentsection.post.Post;
-import com.naical.commentsection.post.PostDTO;
-import com.naical.commentsection.post.PostServiceImp;
-import com.naical.commentsection.user.User;
-import com.naical.commentsection.user.UserServiceImp;
+
+import com.naical.commentsection.security.user.User;
+import com.naical.commentsection.security.user.UserServiceImp;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -24,18 +21,20 @@ public class PostController {
 
     private final PostServiceImp postServiceImp;
     private final UserServiceImp userServiceImp;
+    private final PostMapper postMapper;
     @GetMapping("/posts")
     public List<PostDTO> getAll() {
         return postServiceImp.getAll();
     }
 
-    @PostMapping("/save/{id}")
-    public ResponseEntity<Post> save(@RequestBody Post post, @PathVariable("id") int id) {
-        User user = userServiceImp.getUserById(id);
+    @PostMapping("/save")
+    public ResponseEntity<PostDTO> save(@RequestBody PostDTO postDTO) {
+        User user = userServiceImp.findById(postDTO.getUserId());
+        Post post = Post.builder().content(postDTO.getContent()).build();
         user.addPost(post);
         userServiceImp.save(user);
         postServiceImp.save(post);
-        return new ResponseEntity<>(post, HttpStatus.OK);
+        return new ResponseEntity<>(postMapper.postToPostDTO(postServiceImp.save(post)), HttpStatus.OK);
     }
 
     @DeleteMapping("/delete/{id}")
@@ -44,4 +43,6 @@ public class PostController {
         postServiceImp.delete(id);
         return new ResponseEntity<>(post, HttpStatus.OK);
     }
+
+
 }

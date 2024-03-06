@@ -11,15 +11,16 @@ import java.util.stream.Collectors;
 public class PostServiceImp implements PostService {
 
     private final PostRepository postRepository;
-
+    private final PostMapper postMapper;
     @Override
     public List<PostDTO> getAll() {
-        return postRepository.findAll().stream().map(Post::toDTO).toList();
+        return postRepository.findAll().stream().map(postMapper::postToPostDTO).toList();
     }
 
+
     @Override
-    public void save(Post post) {
-        postRepository.save(post);
+    public Post save(Post post) {
+       return postRepository.save(post);
     }
 
     @Override
