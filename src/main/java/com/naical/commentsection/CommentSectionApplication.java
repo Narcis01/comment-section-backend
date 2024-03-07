@@ -16,9 +16,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @Slf4j
 public class  CommentSectionApplication {
 
-	private final PostRepository postRepository;
-	private final CommentRepository commentRepository;
-
 	public static void main(String[] args) {
 		SpringApplication.run(CommentSectionApplication.class, args);
 	}

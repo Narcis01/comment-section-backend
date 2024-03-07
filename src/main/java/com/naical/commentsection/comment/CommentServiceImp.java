@@ -1,5 +1,6 @@
 package com.naical.commentsection.comment;
 
+import com.naical.commentsection.kafka.KafkaProducerService;
 import com.naical.commentsection.post.Post;
 import com.naical.commentsection.post.PostRepository;
 import com.naical.commentsection.post.PostServiceImp;
@@ -20,20 +21,21 @@ public class CommentServiceImp implements CommentService{
     private final PostRepository postRepository;
     private final PostServiceImp postServiceImp;
     private final UserServiceImp userServiceImp;
+    private final KafkaProducerService kafkaProducerService;
+    private final CommentMapper commentMapper;
     @Override
     public List<Comment> getAll() {
-        return commentRepository.findAll();
+        List<Comment> comments = commentRepository.findAll();
+        kafkaProducerService.sendCommentListEvent(comments.stream().map(commentMapper::commentToCommentDTO).toList(), "Comment found: ");
+        return comments;
     }
 
     @Override
     public void deleteById(int id) {
+        Comment comment = commentRepository.findById(id).orElseThrow();
+        kafkaProducerService.sendCommentEvent(commentMapper.commentToCommentDTO(comment), "Comment deleted: ");
         commentRepository.deleteById(id);
     }
-
-    public Comment save(Comment comment){
-        return commentRepository.save(comment);
-    }
-
 
     @Override
     public Comment saveToComment(CommentDTO commentDTO) {
@@ -46,11 +48,17 @@ public class CommentServiceImp implements CommentService{
 
         postRepository.save(post);
         userServiceImp.save(user);
-        commentRepository.save(comment);
-
-        return comment;
+        Comment commentSaved = commentRepository.save(comment);
+        kafkaProducerService.sendCommentEvent(commentMapper.commentToCommentDTO(commentSaved), "Comment saved: ");
+        return commentSaved;
     }
 
+    @Override
+    public Comment getById(int id) {
+        Comment comment = commentRepository.findById(id).orElseThrow();
+        kafkaProducerService.sendCommentEvent(commentMapper.commentToCommentDTO(comment), "Comment found: ");
+        return comment;
+    }
 
 
 }

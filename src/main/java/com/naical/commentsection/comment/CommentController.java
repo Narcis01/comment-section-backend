@@ -1,9 +1,5 @@
 package com.naical.commentsection.comment;
 
-import com.naical.commentsection.comment.Comment;
-import com.naical.commentsection.comment.CommentDTO;
-import com.naical.commentsection.comment.CommentMapper;
-import com.naical.commentsection.comment.CommentServiceImp;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -30,7 +26,6 @@ public class CommentController {
 
     @PostMapping("/save")
     public ResponseEntity<CommentDTO> save(@RequestBody CommentDTO commentDTO){
-        log.info(commentDTO.toString());
         commentServiceImpl.saveToComment(commentDTO);
         return new ResponseEntity<>(commentDTO, HttpStatus.OK);
     }
@@ -41,5 +36,9 @@ public class CommentController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-
+    @GetMapping("/comment")
+    public ResponseEntity<CommentDTO> getById(@RequestParam int id){
+        Comment comment = commentServiceImpl.getById(id);
+        return new ResponseEntity<>(commentMapper.commentToCommentDTO(comment), HttpStatus.OK);
+    }
 }

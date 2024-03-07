@@ -1,5 +1,6 @@
 package com.naical.commentsection.security.auth;
 
+import com.naical.commentsection.kafka.KafkaProducerService;
 import com.naical.commentsection.security.config.JwtService;
 import com.naical.commentsection.security.token.Token;
 import com.naical.commentsection.security.token.TokenRepository;
@@ -20,6 +21,7 @@ public class AuthenticationService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService service;
     private final AuthenticationManager authenticationManager;
+    private final KafkaProducerService kafkaProducerService;
 
     public AuthenticationResponse register(RegisterRequest request ){
         var user = User.builder()
@@ -34,11 +36,13 @@ public class AuthenticationService {
         var jwtToken = service.generateToken(user);
         var refreshToken = service.generateRefreshToken(user);
         saveUserToken(savedUser, jwtToken);
+        kafkaProducerService.sendAuthEvent("User with email: " + user.getEmail() + " registered");
         return AuthenticationResponse.builder()
                 .accessToken(jwtToken)
                 .refreshToken(refreshToken)
                 .role(savedUser.getRole())
                 .build();
+
     }
 
     public AuthenticationResponse authenticate(AuthenticationRequest request){
@@ -54,6 +58,7 @@ public class AuthenticationService {
         var refreshToken = service.generateRefreshToken(user);
         revokeAllUserTokens(user);
         saveUserToken(user, jwtToken);
+        kafkaProducerService.sendAuthEvent("User with email: "+ user.getEmail() + " logged in");
         return AuthenticationResponse.builder()
                 .accessToken(jwtToken)
                 .refreshToken(refreshToken)
