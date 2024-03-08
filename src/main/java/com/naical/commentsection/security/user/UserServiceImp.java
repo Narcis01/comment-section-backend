@@ -22,7 +22,7 @@ public class UserServiceImp  implements UserService{
     public List<User> findAllByRole(Role role) {
         List<User> users = userRepository.findAllByRole(role);
         kafkaProducerService.sendUserListEvent(users.stream().map(userMapper::userToUserDTO).toList(), "Users with role " + role + " found:");
-        return userRepository.findAllByRole(role);
+        return users;
     }
 
     @Override
